@@ -29,5 +29,23 @@ pipeline{
                 }
             }
         }
+
+        stage('Parallel Execution'){
+            parallel{
+                stage('test1'){
+                    steps{
+                        echo "test1"
+                        sh 'ls -lrt'
+                    }
+                }
+
+                stage('test2'){
+                    steps{
+                        echo "test2"
+                        sh 'ls -a'
+                    }
+                }
+            }
+        }
     }
 }

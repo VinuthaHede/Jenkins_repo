@@ -7,10 +7,10 @@ parameters{
 }
 
 parameters{
-    boolean(name: "CHECKOUT", defaultValue: true, description: "checkout stage")
-    boolean(name: "BUILD", defaultValue: true, description: "build stage")
-    boolean(name: "TEST", defaultValue: true, description: "test stage")
-    boolean(name: "Toggle", defaultValue: true, description: "deploy stage")
+    booleanParam(name: "CHECKOUT", defaultValue: true, description: "checkout stage")
+    booleanParam(name: "BUILD", defaultValue: true, description: "build stage")
+    booleanParam(name: "TEST", defaultValue: true, description: "test stage")
+    booleanParam(name: "Toggle", defaultValue: true, description: "deploy stage")
 }
 
 environment{
@@ -118,13 +118,13 @@ stage('BUILD'){
 //parallel exceution of 2 or more stages, here parallely executed stages will be taken as substages of one main stage
 stage('Parallel Execution'){
     parallel{
-        stage('test1){
+        stage('test1'){
             steps{
                 sh 'ls -lrt'
             }
         }
 
-        stage('test2){
+        stage('test2'){
             steps{
                 sh 'ls -a'
             }
