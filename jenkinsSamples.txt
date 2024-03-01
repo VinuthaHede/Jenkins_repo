@@ -1,0 +1,133 @@
+parameters{
+    string(name: "Username", defaultValue: "Vinutha", description: "enter your name here)
+    text(name: "Details", defaultValue: "", description: "enter user details here)
+    boolean(name: "Toggle", defaultValue: true, description: "toggle values")
+    choice(name: "Choice", choice:["one", "two", "three"], description: "select a value from below")
+    password(name: "Password", defaultValue: "secret", description: "enter your password")
+}
+
+parameters{
+    boolean(name: "CHECKOUT", defaultValue: true, description: "checkout stage")
+    boolean(name: "BUILD", defaultValue: true, description: "build stage")
+    boolean(name: "TEST", defaultValue: true, description: "test stage")
+    boolean(name: "Toggle", defaultValue: true, description: "deploy stage")
+}
+
+environment{
+    TEST="test value"
+    TEST1="test value1"
+    DEPLOY_TO="Testing"
+}
+
+//this is build periodically 
+triggers{
+    cron(*/59 * * * *)    //run job every hours
+}
+
+//pollscm job
+triggers{
+    pollSCM(*/59 * * * *)    //checks for new commits every hours and if new commits found then it runs the job
+}
+
+option{
+    timeout(time: 20, unit: "MINUTES") 
+}
+
+//catchError is for exceptions handling in pipelines
+stage ('TEST'){
+    steps{
+        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') { // UNSTABLE, ABORTED, 
+            sh '''
+                sleep 10
+                exit 1  //1 specifies failure as 0 specifies success 
+            '''
+        }
+    }
+}
+
+
+//ckeckout code from git repo
+stage ('CHECKOUT'){
+    steps{
+        checkout([$class: 'GitSCM',
+                  branches: [[name: "*/main"]]
+                  userRemoteConfigs: [[url:  , credentialsId: "gitHub"]]
+                ])
+    }
+}
+
+//when conditions in pipelines
+stage ('CHECKOUT'){
+    when{
+        expression{
+            params.CHECKOUT == true   // we are checking if CHECKOUT boolean value is true, if it is true the we proceed with steps
+                                      // else we move to next stage
+        }
+    }
+    steps{
+        checkout([$class: 'GitSCM',
+                  branches: [[name: "*/main"]]
+                  userRemoteConfigs: [[url:  , credentialsId: "gitHub"]]
+                ])
+    }
+}
+
+
+//different types of credentials
+
+stage('CHECKOUT'){
+    steps{
+        //accessing with username and password
+        withCredentials([usernamePassword(credentialsId: " ", usernameVariable: "Username", passwordVariable: "Password")]){
+            echo "$Username $Password"
+        }
+
+        //accessing with secret text
+        withCredentials([string(credentialsId: " ", variable: "SecretText")]){
+            sh'''
+                echo "SecretText: $SecretText"
+            '''
+        }
+
+        //accessing with secret file
+        withCredentials([file(credentialsId: " ", variable: "filePath")]){
+            sh'''
+                echo "File Path: $filePath"
+                cat "$filePath"
+            '''
+        }
+
+        //accessing with ssh username and private key
+        withCredentials([sshUserPrivateKey(credentialsId: " ", usernameVariable: "Username", keyFileVariable: "privateKey")]){
+            echo "$Username"
+            echo "$privateKey"
+        }
+    }
+}
+
+//groovy script in pipelines
+stage('BUILD'){
+    steps{
+        script{  //we can write if, for and other codes in script block
+            echo "${params.Username}
+            echo "${env.DEPLOY_TO}
+        }
+    }
+}
+
+//parallel exceution of 2 or more stages, here parallely executed stages will be taken as substages of one main stage
+stage('Parallel Execution'){
+    parallel{
+        stage('test1){
+            steps{
+                sh 'ls -lrt'
+            }
+        }
+
+        stage('test2){
+            steps{
+                sh 'ls -a'
+            }
+        }
+    }
+}
