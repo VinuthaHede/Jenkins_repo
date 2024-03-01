@@ -30,22 +30,16 @@ pipeline{
             }
         }
 
-        stage('Parallel Execution'){
-            parallel{
-                stage('test1'){
-                    steps{
-                        echo "test1"
-                        sh 'ls -lrt'
-                    }
-                }
-
-                stage('test2'){
-                    steps{
-                        echo "test2"
-                        sh 'ls -a'
-                    }
+        stage ('TEST'){
+            steps{
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') { // UNSTABLE, ABORTED, 
+                    sh '''
+                        sleep 10
+                        exit 1  
+                    '''
                 }
             }
         }
+
     }
 }
