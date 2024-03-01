@@ -9,14 +9,24 @@ pipeline{
         password(name: "Password", defaultValue: "secret", description: "enter your password")
     }
 
+    environment{
+        TEST="test value"
+        TEST1="test value1"
+        DEPLOY_TO="Testing"
+    }
+
     stages{
         stage ('build'){
             steps{
                 echo "$Username"
                 echo "$Details"
                 echo "$Toggle"
-                echo "$Choice"
                 echo "$Password"
+
+                script{
+                    echo "${params.Choice}"
+                    echo "${env.DEPLOY_TO}"
+                }
             }
         }
     }
