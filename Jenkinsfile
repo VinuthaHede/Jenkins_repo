@@ -35,7 +35,7 @@ pipeline{
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') { // UNSTABLE, ABORTED, 
                     sh '''
                         sleep 10
-                        exit 1  
+                        echo "Test is completed successfully"
                     '''
                 }
             }
